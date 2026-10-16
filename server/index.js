@@ -6,11 +6,32 @@ import lookupRouter from './routes/lookup.js';
 import resultsRouter from './routes/results.js';
 import addPollingUnitRouter from './routes/addPollingUnit.js';
 
+
+
+
+
+
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+const allowed = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
+
+
+app.use(cors({
+    origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (allowed.length === 0) return cb(null, true);
+    if (allowed.includes(origin)) return cb(null, true);
+    return cb(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  credentials: false
+
+}));
 app.use(express.json());
 
 // Health check
